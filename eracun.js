@@ -10,6 +10,7 @@ var sqlite3 = require('sqlite3').verbose();
 var pb = new sqlite3.Database('chinook.sl3');
 
 // Priprava strežnika
+
 var express = require('express');
 var expressSession = require('express-session');
 var streznik = express();
@@ -47,6 +48,9 @@ function davcnaStopnja(izvajalec, zanr) {
 
 // Prikaz seznama pesmi na strani
 streznik.get('/', function(zahteva, odgovor) {
+  if (zahteva.session.client == undefined) {
+    odgovor.redirect('/prijava');
+  } else {
   pb.all("SELECT Track.TrackId AS id, Track.Name AS pesem, \
           Artist.Name AS izvajalec, Track.UnitPrice * " +
           razmerje_usd_eur + " AS cena, \
@@ -68,6 +72,7 @@ streznik.get('/', function(zahteva, odgovor) {
         odgovor.render('seznam', {seznamPesmi: vrstice});
       }
   })
+  }
 })
 
 // Dodajanje oz. brisanje pesmi iz košarice
@@ -220,6 +225,7 @@ streznik.post('/prijava', function(zahteva, odgovor) {
 })
 
 // Prikaz strani za prijavo
+
 streznik.get('/prijava', function(zahteva, odgovor) {
   vrniStranke(function(napaka1, stranke) {
       vrniRacune(function(napaka2, racuni) {
@@ -233,12 +239,15 @@ streznik.post('/stranka', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
   
   form.parse(zahteva, function (napaka1, polja, datoteke) {
+    zahteva.session.client =  polja['seznamStrank'];
     odgovor.redirect('/')
   });
 })
 
 // Odjava stranke
 streznik.post('/odjava', function(zahteva, odgovor) {
+  zahteva.session.client = undefined;
+  zahteva.session.destroy();
     odgovor.redirect('/prijava') 
 })
 
