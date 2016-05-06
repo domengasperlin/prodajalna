@@ -6,6 +6,7 @@ if (!process.env.PORT)
   process.env.PORT = 8080;
 
 // Priprava povezave na podatkovno bazo
+
 var sqlite3 = require('sqlite3').verbose();
 var pb = new sqlite3.Database('chinook.sl3');
 
@@ -13,6 +14,7 @@ var pb = new sqlite3.Database('chinook.sl3');
 var express = require('express');
 var expressSession = require('express-session');
 var streznik = express();
+
 streznik.set('view engine', 'ejs');
 streznik.use(express.static('public'));
 streznik.use(
@@ -211,12 +213,36 @@ streznik.post('/prijava', function(zahteva, odgovor) {
       //TODO: add fields and finalize
       //stmt.run("", "", "", "", "", "", "", "", "", "", "", 3); 
       //stmt.finalize();
+      stmt.run(polja.FirstName,polja.LastName,polja.Company,polja.Address,polja.City,polja.State,polja.Country,
+      polja.PostalCode,polja.Phone,polja.Fax,polja.Email,3);
+      stmt.finalize();
+      
     } catch (err) {
       napaka2 = true;
+    //  odgovor.end();
     }
-  
-    odgovor.end();
+    //odgovor.redirect('/prijava');
+    switch (napaka2) {
+      case true:
+      vrniStranke(function(napaka1, stranke) {
+      vrniRacune(function(napaka2, racuni) {
+      odgovor.render('prijava', {sporocilo: "Prišlo je do napake pri registraciji nove stranke. Prosim preverite vnešene podatke in poskusite znova.",seznamStrank: stranke, seznamRacunov: racuni});
+          });
+      });
+        break;
+      default:
+      vrniStranke(function(napaka1, stranke) {
+          vrniRacune(function(napaka2, racuni) {
+               odgovor.render('prijava', {sporocilo: "Stranka je bila uspešno registrirana.",seznamStrank: stranke, seznamRacunov: racuni});
+          });
+      });
+    }
+
+     
+ 
+   
   });
+  
 })
 
 // Prikaz strani za prijavo
