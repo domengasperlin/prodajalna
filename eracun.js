@@ -152,35 +152,35 @@ streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
   form.parse(zahteva, function (napaka1, polja, datoteke) {
     strankaIzRacuna(polja.seznamRacunov, function prikazi(klient) {
      pesmiIzRacuna(polja.seznamRacunov,function pazi(pesmi) {
-          if (!napaka1) {
-          odgovor.setHeader('content-type','text/xml');
-          odgovor.render('eslog',{vizualiziraj: true, postavkeRacuna: pesmi, narocnik:klient[0]});
+          if (!pesmi) {
+            odgovor.sendStatus(500);
+          }
+          else if (pesmi.length == 0) 
+          {
+             odgovor.send("<p>V košarici nimate nobene pesmi, \
+        zato računa ni mogoče pripraviti!</p>");
+          }
+          else if (napaka1) {
+             odgovor.send("Napaka");
           }
          else{
-           odgovor.send("Napaka");
+           odgovor.setHeader('content-type','text/xml');
+          odgovor.render('eslog',{vizualiziraj: true, postavkeRacuna: pesmi, narocnik:klient[0]});
+        
           }
           });
-         
-          
     });
   });
-})
+});
 
 // Izpis računa v HTML predstavitvi ali izvorni XML obliki
 streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
   pesmiIzKosarice(zahteva, function(pesmi) {
     if (!pesmi) {
-      odgovor.setHeader('content-type', 'text/xml');
-      odgovor.render('eslog', {
-        vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
-        postavkeRacuna: pesmi
-      })  
+      odgovor.sendStatus(500);
     } else if (pesmi.length == 0) {
-      odgovor.setHeader('content-type', 'text/xml');
-      odgovor.render('eslog', {
-        vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
-        postavkeRacuna: pesmi
-      })  
+      odgovor.send("<p>V košarici nimate nobene pesmi, \
+        zato računa ni mogoče pripraviti!</p>");
     } else {
       odgovor.setHeader('content-type', 'text/xml');
       odgovor.render('eslog', {
