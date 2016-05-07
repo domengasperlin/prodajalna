@@ -133,7 +133,7 @@ var pesmiIzRacuna = function(racunId, callback) {
     Track.TrackId IN (SELECT InvoiceLine.TrackId FROM InvoiceLine, Invoice \
     WHERE InvoiceLine.InvoiceId = Invoice.InvoiceId AND Invoice.InvoiceId = " + racunId + ")",
     function(napaka, vrstice) {
-      console.log(vrstice);
+      callback(vrstice);
     })
 }
 
@@ -142,23 +142,45 @@ var strankaIzRacuna = function(racunId, callback) {
     pb.all("SELECT Customer.* FROM Customer, Invoice \
             WHERE Customer.CustomerId = Invoice.CustomerId AND Invoice.InvoiceId = " + racunId,
     function(napaka, vrstice) {
-      console.log(vrstice);
+      callback(vrstice);
     })
 }
 
 // Izpis računa v HTML predstavitvi na podlagi podatkov iz baze
 streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
-  odgovor.end();
+  var form = new formidable.IncomingForm();
+  form.parse(zahteva, function (napaka1, polja, datoteke) {
+    strankaIzRacuna(polja.seznamRacunov, function prikazi(stranke) {
+     pesmiIzRacuna(polja.seznamRacunov,function pazi(pesmi) {
+          if (!napaka1) {
+          odgovor.setHeader('content-type','text/xml');
+          odgovor.render('eslog',{vizualiziraj: true, postavkeRacuna: pesmi, stranke:stranke});
+          }
+         else{
+           odgovor.send("Napaka");
+          }
+          });
+         
+          
+    });
+  });
 })
 
 // Izpis računa v HTML predstavitvi ali izvorni XML obliki
 streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
   pesmiIzKosarice(zahteva, function(pesmi) {
     if (!pesmi) {
-      odgovor.sendStatus(500);
+      odgovor.setHeader('content-type', 'text/xml');
+      odgovor.render('eslog', {
+        vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
+        postavkeRacuna: pesmi
+      })  
     } else if (pesmi.length == 0) {
-      odgovor.send("<p>V košarici nimate nobene pesmi, \
-        zato računa ni mogoče pripraviti!</p>");
+      odgovor.setHeader('content-type', 'text/xml');
+      odgovor.render('eslog', {
+        vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
+        postavkeRacuna: pesmi
+      })  
     } else {
       odgovor.setHeader('content-type', 'text/xml');
       odgovor.render('eslog', {
