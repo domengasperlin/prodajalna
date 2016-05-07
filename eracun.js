@@ -150,11 +150,11 @@ var strankaIzRacuna = function(racunId, callback) {
 streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
   form.parse(zahteva, function (napaka1, polja, datoteke) {
-    strankaIzRacuna(polja.seznamRacunov, function prikazi(stranke) {
+    strankaIzRacuna(polja.seznamRacunov, function prikazi(klient) {
      pesmiIzRacuna(polja.seznamRacunov,function pazi(pesmi) {
           if (!napaka1) {
           odgovor.setHeader('content-type','text/xml');
-          odgovor.render('eslog',{vizualiziraj: true, postavkeRacuna: pesmi, stranke:stranke});
+          odgovor.render('eslog',{vizualiziraj: true, postavkeRacuna: pesmi, narocnik:klient[0]});
           }
          else{
            odgovor.send("Napaka");
