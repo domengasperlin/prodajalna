@@ -203,6 +203,7 @@ streznik.post('/prijava', function(zahteva, odgovor) {
   
   form.parse(zahteva, function (napaka1, polja, datoteke) {
     var napaka2 = false;
+    if (napaka1) {odgovor.send("Napaka pri parsanju");}
     try {
       var stmt = pb.prepare("\
         INSERT INTO Customer \
