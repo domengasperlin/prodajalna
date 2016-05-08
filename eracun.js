@@ -107,7 +107,7 @@ var pesmiIzKosarice = function(zahteva, callback) {
         }
         callback(vrstice);
       }
-    })
+    });
   }
 }
 
@@ -134,6 +134,7 @@ var pesmiIzRacuna = function(racunId, callback) {
     WHERE InvoiceLine.InvoiceId = Invoice.InvoiceId AND Invoice.InvoiceId = " + racunId + ")",
     function(napaka, vrstice) {
       console.log(vrstice);
+      callback(vrstice);
     })
 }
 
@@ -143,6 +144,7 @@ var strankaIzRacuna = function(racunId, callback) {
             WHERE Customer.CustomerId = Invoice.CustomerId AND Invoice.InvoiceId = " + racunId,
     function(napaka, vrstice) {
       console.log(vrstice);
+      callback(vrstice);
     })
 }
 
@@ -153,18 +155,37 @@ streznik.post('/izpisiRacunBaza', function(zahteva, odgovor) {
 
 // Izpis računa v HTML predstavitvi ali izvorni XML obliki
 streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
+  
   pesmiIzKosarice(zahteva, function(pesmi) {
+    var idStranke = zahteva.session.StrankaID;
+    console.log(idStranke);
     if (!pesmi) {
       odgovor.sendStatus(500);
     } else if (pesmi.length == 0) {
       odgovor.send("<p>V košarici nimate nobene pesmi, \
         zato računa ni mogoče pripraviti!</p>");
     } else {
+      vrniStranke(function(napaka3,klient) {
+       if (!klient) {
+          odgovor.send("Prislo je do napake")
+        }
+        else {
+          console.log(zahteva.session.StrankaID)
+           console.log(klient[i]);
+            for (var i = 0; i < klient.length; i++)  {
+               console.log("klient je: "+idStranke+"stranka je"+klient[i].CustomerId);
+              if (idStranke == klient[i].CustomerId) {
       odgovor.setHeader('content-type', 'text/xml');
       odgovor.render('eslog', {
         vizualiziraj: zahteva.params.oblika == 'html' ? true : false,
-        postavkeRacuna: pesmi
-      })  
+        postavkeRacuna: pesmi, narocnik: klient[i]
+        
+           });
+              }
+            }
+            
+        }
+      })
     }
   })
 })
@@ -233,12 +254,16 @@ streznik.post('/stranka', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
   
   form.parse(zahteva, function (napaka1, polja, datoteke) {
+    console.log("Seznam strank se glasi: "+polja.seznamStrank);
+   
+    zahteva.session.StrankaID = polja.seznamStrank;
     odgovor.redirect('/')
   });
 })
 
 // Odjava stranke
 streznik.post('/odjava', function(zahteva, odgovor) {
+ // zahteva.session.strankaID = null;
     odgovor.redirect('/prijava') 
 })
 
