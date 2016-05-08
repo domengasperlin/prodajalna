@@ -133,7 +133,6 @@ var pesmiIzRacuna = function(racunId, callback) {
     Track.TrackId IN (SELECT InvoiceLine.TrackId FROM InvoiceLine, Invoice \
     WHERE InvoiceLine.InvoiceId = Invoice.InvoiceId AND Invoice.InvoiceId = " + racunId + ")",
     function(napaka, vrstice) {
-      console.log(vrstice);
       callback(vrstice);
     })
 }
@@ -143,7 +142,6 @@ var strankaIzRacuna = function(racunId, callback) {
     pb.all("SELECT Customer.* FROM Customer, Invoice \
             WHERE Customer.CustomerId = Invoice.CustomerId AND Invoice.InvoiceId = " + racunId,
     function(napaka, vrstice) {
-      console.log(vrstice);
       callback(vrstice);
     })
 }
@@ -158,7 +156,6 @@ streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
   
   pesmiIzKosarice(zahteva, function(pesmi) {
     var idStranke = zahteva.session.StrankaID;
-    console.log(idStranke);
     if (!pesmi) {
       odgovor.sendStatus(500);
     } else if (pesmi.length == 0) {
@@ -170,10 +167,7 @@ streznik.get('/izpisiRacun/:oblika', function(zahteva, odgovor) {
           odgovor.send("Prislo je do napake")
         }
         else {
-          console.log(zahteva.session.StrankaID)
-           console.log(klient[i]);
             for (var i = 0; i < klient.length; i++)  {
-               console.log("klient je: "+idStranke+"stranka je"+klient[i].CustomerId);
               if (idStranke == klient[i].CustomerId) {
       odgovor.setHeader('content-type', 'text/xml');
       odgovor.render('eslog', {
@@ -254,7 +248,6 @@ streznik.post('/stranka', function(zahteva, odgovor) {
   var form = new formidable.IncomingForm();
   
   form.parse(zahteva, function (napaka1, polja, datoteke) {
-    console.log("Seznam strank se glasi: "+polja.seznamStrank);
    
     zahteva.session.StrankaID = polja.seznamStrank;
     odgovor.redirect('/')
