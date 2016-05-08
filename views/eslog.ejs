@@ -5,6 +5,10 @@
 <IzdaniRacunEnostavni xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xds="http://uri.etsi.org/01903/v1.1.1#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.gzs.si/e-poslovanje/sheme/eSLOG_1-6_EnostavniRacun.xsd">
 	<Racun Id="data">
 		<!-- verzija priročnika -->
+		<% 
+ 		if (typeof narocnik === 'undefined') narocnik = {FirstName: "Univerza v Ljubljani,", LastName: "Fakulteta za računalništvo in informatiko ",Fax: "38612419350",Email: "Dejan Lavbič", Company: "Laboratorij za podatkovne tehnologije", Address: "Večna pot 113, nadstropje 2, kabinet R2.49",
+PostalCode: "1000",City: "Ljubljana",  Country: "Slovenija",  Phone: "38614798000" };
+ 	  	%>
 		<PoljubnoBesedilo>
 			<VrstaBesedila>AAI</VrstaBesedila>
 			<Besedilo>
